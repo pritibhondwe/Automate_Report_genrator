@@ -12,6 +12,7 @@ const emptyReport = () => ({
   speakerDesignation: "",
   registrationLink: "",
   attendanceLink: "",
+  feedbackformLink: "",           // ✅ FIX 1: added missing field
   sessionRoles: { hod: "", coordinator: "", anchor: "", voteOfThanks: "" },
   whocanattend: [],
   noticeFiles: [],
@@ -211,6 +212,7 @@ function ReportCard({ index, report, onChange, onRemove, totalReports }) {
       </section>
 
       {/* LINKS */}
+      {/* ✅ FIX 2: Added Feedback Form Link input field in the Links section */}
       <section className="mb-6">
         <h4 className="text-xs font-semibold text-indigo-500 uppercase tracking-wide border-b border-gray-100 pb-2 mb-4">
           Links
@@ -225,6 +227,20 @@ function ReportCard({ index, report, onChange, onRemove, totalReports }) {
             <label className="block text-xs font-medium text-gray-600 mb-1">Attendance Link</label>
             <input type="url" className={inputClass} placeholder="https://..."
               value={report.attendanceLink} onChange={(e) => set("attendanceLink", e.target.value)} />
+          </div>
+          {/* ✅ NEW: Feedback Form Link — spans full width so it stands out */}
+          <div className="md:col-span-2">
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Feedback Form Link
+              <span className="ml-2 text-indigo-400 font-normal">(QR code will be added to PDF)</span>
+            </label>
+            <input
+              type="url"
+              className={inputClass}
+              placeholder="https://forms.google.com/..."
+              value={report.feedbackformLink}
+              onChange={(e) => set("feedbackformLink", e.target.value)}
+            />
           </div>
         </div>
       </section>
@@ -327,7 +343,12 @@ export default function CreateReport() {
       const report = reports[i];
       try {
         const formData = new FormData();
+
+        // ✅ FIX 3: feedbackformLink is now included in reportData
+        // because it's in emptyReport() — the destructure below correctly
+        // strips only file/preview fields, keeping feedbackformLink in reportData
         const { noticeFiles, photos, noticePreviews, photoPreviews, email, ...reportData } = report;
+
         formData.append("data", JSON.stringify(reportData));
         noticeFiles.forEach((f) => formData.append("noticeFile", f));
         photos.forEach((f) => formData.append("photos", f));
