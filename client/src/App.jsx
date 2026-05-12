@@ -2,11 +2,10 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
-import MainLayout from "./components/MainLayout";
+import MainLayout from "/components/MainLayout.jsx";
 import CreateReport from "./pages/CreateReport";
 import ViewReports from "./pages/ViewReports";
 import Dashboard from "./pages/Dashboard";
-
 // Protects routes that require login
 function PrivateRoute({ children }) {
   const token = localStorage.getItem("token");
