@@ -4,6 +4,9 @@ const cors = require("cors");
 const path = require("path");
 require("dotenv").config({ path: path.join(__dirname, ".env") }); 
 
+console.log("EMAIL =", process.env.EMAIL);
+console.log("EMAIL_PASSWORD =", process.env.EMAIL_PASSWORD);
+
 const authRoutes = require("./routes/authRoutes"); 
 const reportRoutes = require("./routes/reportRoutes");
 

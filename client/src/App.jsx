@@ -6,6 +6,7 @@ import MainLayout from "/components/MainLayout.jsx";
 import CreateReport from "./pages/CreateReport";
 import ViewReports from "./pages/ViewReports";
 import Dashboard from "./pages/Dashboard";
+import VerifyOTP from "./pages/VerifyOTP";
 // Protects routes that require login
 function PrivateRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -20,6 +21,10 @@ function App() {
         <Route path="/" element={<Navigate to="/register" replace />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route
+  path="/verify-otp"
+  element={<VerifyOTP />}
+/>
 
         {/* Protected routes with sidebar layout */}
         <Route

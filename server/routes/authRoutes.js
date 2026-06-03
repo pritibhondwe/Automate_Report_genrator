@@ -2,7 +2,15 @@ const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const nodemailer = require("nodemailer");
 
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL,
+    pass: process.env.EMAIL_PASSWORD
+  }
+});
 // REGISTER
 router.post("/register", async (req, res) => {
   try {
@@ -57,26 +65,102 @@ router.post("/login", async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(400).json({ message: "User not found" });
+      return res.status(400).json({
+        message: "User not found"
+      });
     }
 
-    const valid = await bcrypt.compare(password, user.password);
-
-    if (!valid) {
-      return res.status(400).json({ message: "Invalid password" });
-    }
-
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET || "secretkey"
+    const valid = await bcrypt.compare(
+      password,
+      user.password
     );
 
-    res.json({ token, user });
+    if (!valid) {
+      return res.status(400).json({
+        message: "Invalid password"
+      });
+    }
+
+    const otp = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
+
+    user.otp = otp;
+    user.otpExpiry = Date.now() + 300000;
+
+    await user.save();
+
+    await transporter.sendMail({
+      from: process.env.EMAIL,
+      to: email,
+      subject: "Login OTP",
+      html: `
+        <h2>OTP Verification</h2>
+        <p>Your OTP is:</p>
+        <h1>${otp}</h1>
+        <p>Valid for 5 minutes.</p>
+      `
+    });
+
+    res.json({
+      success: true,
+      email
+    });
 
   } catch (err) {
-    console.error("LOGIN ERROR:", err);
-    res.status(500).json({ message: "Server Error" });
+    console.error(err);
+    res.status(500).json({
+      message: "Server Error"
+    });
   }
 });
 
+
+router.post("/verify-otp", async (req, res) => {
+  try {
+
+    const { email, otp } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "User not found"
+      });
+    }
+
+    if (
+      user.otp !== otp ||
+      user.otpExpiry < Date.now()
+    ) {
+      return res.status(400).json({
+        message: "Invalid OTP"
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        id: user._id,
+        role: user.role
+      },
+      process.env.JWT_SECRET || "secretkey"
+    );
+
+    user.otp = null;
+    user.otpExpiry = null;
+
+    await user.save();
+
+    res.json({
+      token,
+      user
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Server Error"
+    });
+  }
+});
 module.exports = router;

@@ -521,11 +521,11 @@ router.post("/email/:id", async (req, res) => {
     const fp = await generatePDF(report);
     const t  = nodemailer.createTransport({
       service: "gmail",
-      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+      auth: { user: process.env.EMAIL, pass: process.env.EMAIL_PASSWORD },
     });
 
     await t.sendMail({
-      from: `"Activity Report System" <${process.env.EMAIL_USER}>`,
+      from: `"Activity Report System" <${process.env.EMAIL}>`,
       to,
       subject: `Activity Report – ${report.title}`,
       html: `<div style="font-family:sans-serif">

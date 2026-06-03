@@ -18,9 +18,17 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", form);
-      localStorage.setItem("token", res.data.token);
-      navigate("/home");
+      await axios.post(
+  "http://localhost:5000/api/auth/login",
+  form
+);
+
+localStorage.setItem(
+  "email",
+  form.email
+);
+
+navigate("/verify-otp");
     } catch (err) {
       setError(err.response?.data?.message || err.response?.data || "Login failed. Check your credentials.");
     } finally {
